@@ -29,8 +29,8 @@ export function track(target, key) {
 
 export function trigger(target, key) {
   // 触发依赖函数
-  let depMap = targetMap.get(target);
-  let dep = depMap.get(key);
+  let depsMap = targetMap.get(target);
+  let dep = depsMap.get(key);
 
   for (const effect of dep) {
     effect.run();
