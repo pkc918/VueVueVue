@@ -161,3 +161,127 @@ function processText(n1, n2, container) {
 ```
 
 ### runtime-core 更新流程
+
+触发更新，然后执行对应的依赖函数
+函数里执行 render，获取到最新的虚拟节点树 vnodeTree
+执行 patch，选择不同节点类型的更新函数执行
+更新函数内部：对比新旧 props 的区别，以及新旧 children 的区别
+
+对比新旧 props
+
+1. 遍历新 props，对比旧的，进行更新：旧的有的，新的都有，但是 val 值变更了
+2. 遍历旧 props，对比新的，进行更新 咧如：旧的：{a,b,c} 新的：{a,b}，这时候，只遍历新的是无法知道旧的需要删除 c
+
+对比新旧 children
+
+1. 判断类型，如果是 text，那就直接更新 text 就行
+2. 复杂更新，整个 children 对比，数组对比数组，也就是 diff 算法的所在
+
+diff 算法：
+
+1. 双端对比
+2. 交叉对比
+3. key 对比
+
+```Typescript
+当响应式对象 count 更新了，会执行以下操作
+
+// 首先执行 update 函数，该函数就是执行了另外一个函数 componentUpdateFn
+instance.update()
+// componentUpdateFn：内部执行 render，获取最新的vnodeTree，然后执行patch
+function componentUpdateFn() {
+    const subTree = instance.render()
+    patch(null, subTree, container, null, instance)
+}
+// patch 作用就是根据不同类型，执行不同函数
+function patch(n1, n2, container = null, anchor = null, parentComponent = null){
+    const { type, shapeFlag } = n2;
+    switch (type) {
+      case Text:
+        processText(n1, n2, container);
+        break;
+      // 其中还有几个类型比如： static fragment comment
+      case Fragment:
+        // processFragment(n1, n2, container);
+        break;
+      default:
+        // 这里就基于 shapeFlag 来处理
+        if (shapeFlag & ShapeFlags.ELEMENT) {
+          console.log("处理 element");
+          processElement(n1, n2, container, anchor, parentComponent);
+        } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+          console.log("处理 component");
+          processComponent(n1, n2, container, parentComponent);
+        }
+    }
+}
+// 这里面每个函数都会判断是更新还是初始化的过程，这里就拿Element举例吧
+function updateElement(n1, n2, container, anchor, parentComponent) {
+    // 对比 props
+    patchProps(el, oldProps, newProps);
+
+    // 对比 children
+    patchChildren(n1, n2, el, anchor, parentComponent);
+}
+// 查找 props 的更新情况，使用 hostPatchProp 更新 props
+function patchProps(el, oldProps, newProps) {
+    // 对比 props 有以下几种情况
+    // 1. oldProps 有，newProps 也有，但是 val 值变更了
+    // 举个栗子
+    // 之前: oldProps.id = 1 ，更新后：newProps.id = 2
+
+    // key 存在 oldProps 里 也存在 newProps 内
+    // 以 newProps 作为基准
+    for (const key in newProps) {
+      const prevProp = oldProps[key];
+      const nextProp = newProps[key];
+      if (prevProp !== nextProp) {
+        // 对比属性
+        // 需要交给 host 来更新 key
+        hostPatchProp(el, key, prevProp, nextProp);
+      }
+    }
+
+    // 2. oldProps 有，而 newProps 没有了
+    // 之前： {id:1,tId:2}  更新后： {id:1}
+    // 这种情况下我们就应该以 oldProps 作为基准，因为在 newProps 里面是没有的 tId 的
+    // 还需要注意一点，如果这个 key 在 newProps 里面已经存在了，说明已经处理过了，就不要在处理了
+    for (const key in oldProps) {
+      const prevProp = oldProps[key];
+      const nextProp = null;
+      if (!(key in newProps)) {
+        // 这里是以 oldProps 为基准来遍历，
+        // 而且得到的值是 newProps 内没有的
+        // 所以交给 host 更新的时候，把新的值设置为 null
+        hostPatchProp(el, key, prevProp, nextProp);
+      }
+    }
+}
+
+// 查找 children 的更新情况，也就是新旧的差异，diff算法所在
+function patchChildren(n1, n2, container, anchor, parentComponent) {
+    // 首先会判断，children  的类型，如果是文本修改，那直接修改文本即可
+    if(text){
+        hostSetElementText(container, newChildren as string);
+    } else{
+        // 新旧 children 都是数组，array diff array
+        // 这时候就需要对比 children 啦
+        patchKeyedChildren(c1, c2, container, parentComponent, anchor);
+    }
+}
+// patchKeyedChildren: diff算法的定义
+  function patchKeyedChildren(
+    c1: any[],
+    c2: any[],
+    container,
+    parentAnchor,
+    parentComponent
+  ) {
+    /*
+        1. 双端对比（首首，尾尾）
+        2. 交叉对比（首尾）
+        3. key对比（key）
+    */
+  }
+
+```
