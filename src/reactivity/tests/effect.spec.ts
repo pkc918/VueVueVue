@@ -2,7 +2,7 @@ import { effect } from "../effect";
 import { reactive } from "../reactive";
 
 describe("effect", () => {
-  it.skip("happy path", () => {
+  it("happy path", () => {
     // initialization
     const user = reactive({ age: 22 });
     let newAge;
@@ -10,9 +10,9 @@ describe("effect", () => {
     effect(() => {
       newAge = user.age + 1;
     });
-    expect(newAge).toBe(11);
+    expect(newAge).toBe(23);
     // update
     user.age++;
-    expect(newAge).toBe(12);
+    expect(newAge).toBe(24);
   });
 });
