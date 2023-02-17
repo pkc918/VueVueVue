@@ -6,7 +6,8 @@ class ReactiveEffect {
   }
   run() {
     activeEffect = this;
-    this._fn();
+    // 返回 runner 执行后的值
+    return this._fn();
   }
 }
 
@@ -44,4 +45,5 @@ export function effect(effectFn) {
   const _effect = new ReactiveEffect(effectFn);
   // 第一次执行
   _effect.run();
+  return _effect.run.bind(_effect);
 }
