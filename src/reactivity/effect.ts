@@ -1,7 +1,7 @@
 // 用来包装依赖函数的类
 class ReactiveEffect {
   private _fn;
-  constructor(fn) {
+  constructor(fn, public scheduler?) {
     this._fn = fn;
   }
   run() {
@@ -34,15 +34,19 @@ export function trigger(target, key) {
   let dep = depsMap.get(key);
 
   for (const effect of dep) {
-    effect.run();
+    if (effect.scheduler) {
+      effect.scheduler();
+    } else {
+      effect.run();
+    }
   }
 }
 
 // 存出 effect 实例
 let activeEffect;
-export function effect(effectFn) {
+export function effect(effectFn, options: any = {}) {
   // 包装 effectFn
-  const _effect = new ReactiveEffect(effectFn);
+  const _effect = new ReactiveEffect(effectFn, options.scheduler);
   // 第一次执行
   _effect.run();
   return _effect.run.bind(_effect);
