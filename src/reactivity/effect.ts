@@ -51,6 +51,7 @@ export function track(target, key) {
     dep = new Set();
     depsMap.set(key, dep);
   }
+  if (!activeEffect) return;
   dep.add(activeEffect);
   // dep 存 activeEffect, activeEffect反向存储dep
   activeEffect.deps.push(dep);
