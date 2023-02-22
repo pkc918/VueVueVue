@@ -1,3 +1,5 @@
+import { extend } from "./shared";
+
 // 存出 effect 实例
 let activeEffect;
 // 存储依赖容器
@@ -71,7 +73,7 @@ export function trigger(target, key) {
 export function effect(effectFn, options: any = {}) {
   // 包装 effectFn
   const _effect: any = new ReactiveEffect(effectFn, options.scheduler);
-  _effect.onStop = options.onStop;
+  extend(_effect, options);
   // 第一次执行
   _effect.run();
   const runner: any = _effect.run.bind(_effect);
