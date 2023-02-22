@@ -9,6 +9,7 @@ class ReactiveEffect {
   public scheduler: Function | undefined;
   deps = [];
   active = true; // 限制 stop 次数
+  onStop?: () => void; // stop 的回调函数
   constructor(fn, scheduler?: Function) {
     this._fn = fn;
     this.scheduler = scheduler;
@@ -22,6 +23,9 @@ class ReactiveEffect {
     if (this.active) {
       cleanupEffect(this);
       this.active = false;
+      if (this.onStop) {
+        this.onStop();
+      }
     }
   }
 }
@@ -66,7 +70,8 @@ export function trigger(target, key) {
 
 export function effect(effectFn, options: any = {}) {
   // 包装 effectFn
-  const _effect = new ReactiveEffect(effectFn, options.scheduler);
+  const _effect: any = new ReactiveEffect(effectFn, options.scheduler);
+  _effect.onStop = options.onStop;
   // 第一次执行
   _effect.run();
   const runner: any = _effect.run.bind(_effect);
