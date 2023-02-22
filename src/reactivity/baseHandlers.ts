@@ -32,6 +32,10 @@ export const mutableHandlers = {
 export const readonlyHandlers = {
   get: readonlyGet,
   set(target, key, value) {
+    console.warn(
+      `Set operation on key "${String(key)}" failed: target is readonly.`,
+      target
+    );
     return true;
   },
 };
