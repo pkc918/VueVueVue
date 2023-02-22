@@ -1,4 +1,4 @@
-import { reactive } from "../reactive";
+import { isReactive, reactive } from "../reactive";
 
 describe("reactive", () => {
   it("happy patch", () => {
@@ -7,5 +7,7 @@ describe("reactive", () => {
     // 对象之间引用不相等
     expect(instance_reactive).not.toBe(origin);
     expect(instance_reactive.foo).toBe(1);
+    expect(isReactive(instance_reactive)).toBe(true);
+    expect(isReactive(origin)).toBe(false);
   });
 });
