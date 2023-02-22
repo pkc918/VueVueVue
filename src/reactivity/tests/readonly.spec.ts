@@ -8,4 +8,13 @@ describe("readonly", () => {
     expect(wrapped).not.toBe(original);
     expect(wrapped.foo).toBe(1);
   });
+
+  it("warn then call set", () => {
+    console.warn = jest.fn();
+    const readonly_obj = readonly({
+      foo: 1,
+    });
+    readonly_obj.foo++;
+    expect(console.warn).toBeCalled();
+  });
 });
