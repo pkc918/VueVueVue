@@ -21,3 +21,7 @@ export function isReactive(value) {
   // 设置属性，触发get函数，当不是Proxy对象时，会直接 undefined，不会触发 get，需要转换boolean
   return !!value[ReactiveFlags.IS_REACTIVE];
 }
+
+export function isReadonly(value) {
+  return !!value[ReactiveFlags.IS_READONLY];
+}
