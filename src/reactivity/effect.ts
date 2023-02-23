@@ -2,6 +2,8 @@ import { extend } from "./shared";
 
 // 存出 effect 实例
 let activeEffect;
+// 是否收集依赖开发
+let shouldTrack;
 // 存储依赖容器
 const targetMap = new Map();
 
@@ -17,9 +19,20 @@ class ReactiveEffect {
     this.scheduler = scheduler;
   }
   run() {
+    // 执行stop了，就直接return，此时 shouldTrack是false，不会收集依赖
+    if (!this.active) {
+      return this._fn();
+    }
+
     activeEffect = this;
+    // 没有 stop 收集依赖，收集完后，关闭
+    shouldTrack = true;
+    // 在这里会执行 track，shouldTrack为 true，收集依赖
+    const result = this._fn();
+    // reset
+    shouldTrack = false;
     // 返回 runner 执行后的值
-    return this._fn();
+    return result;
   }
   stop() {
     if (this.active) {
@@ -33,12 +46,21 @@ class ReactiveEffect {
 }
 
 function cleanupEffect(effect) {
+  // 把当前依赖 effect 清掉，其他的在这里没有意义，设置0就行
   effect.deps.forEach((dep: any) => {
     dep.delete(effect);
   });
+  effect.deps.length = 0;
+}
+
+function isTracking() {
+  // 当不让 收集依赖，或者activeEffect 没有初始化的时候，都返回 false
+  return shouldTrack && activeEffect !== undefined;
 }
 
 export function track(target, key) {
+  // 不让收集依赖
+  if (!isTracking()) return;
   // {target: { key: [ effectFn ]}}
   let depsMap = targetMap.get(target);
   if (!depsMap) {
@@ -51,7 +73,6 @@ export function track(target, key) {
     dep = new Set();
     depsMap.set(key, dep);
   }
-  if (!activeEffect) return;
   dep.add(activeEffect);
   // dep 存 activeEffect, activeEffect反向存储dep
   activeEffect.deps.push(dep);
