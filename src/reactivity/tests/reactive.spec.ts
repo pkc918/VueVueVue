@@ -1,4 +1,4 @@
-import { isReactive, reactive } from "../reactive";
+import { isProxy, isReactive, reactive } from "../reactive";
 
 describe("reactive", () => {
   it("happy patch", () => {
@@ -9,6 +9,7 @@ describe("reactive", () => {
     expect(instance_reactive.foo).toBe(1);
     expect(isReactive(instance_reactive)).toBe(true);
     expect(isReactive(origin)).toBe(false);
+    expect(isProxy(instance_reactive)).toBe(true);
   });
 
   it("nested reactive", () => {
