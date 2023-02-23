@@ -53,7 +53,7 @@ function cleanupEffect(effect) {
   effect.deps.length = 0;
 }
 
-function isTracking() {
+export function isTracking() {
   // 当不让 收集依赖，或者activeEffect 没有初始化的时候，都返回 false
   return shouldTrack && activeEffect !== undefined;
 }
@@ -73,6 +73,11 @@ export function track(target, key) {
     dep = new Set();
     depsMap.set(key, dep);
   }
+  trackEffect(dep);
+}
+
+export function trackEffect(dep) {
+  if (dep.has(activeEffect)) return;
   dep.add(activeEffect);
   // dep 存 activeEffect, activeEffect反向存储dep
   activeEffect.deps.push(dep);
@@ -82,7 +87,10 @@ export function trigger(target, key) {
   // 触发依赖函数
   let depsMap = targetMap.get(target);
   let dep = depsMap.get(key);
+  triggerEffects(dep);
+}
 
+export function triggerEffects(dep) {
   for (const effect of dep) {
     if (effect.scheduler) {
       effect.scheduler();
