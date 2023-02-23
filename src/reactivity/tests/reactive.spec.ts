@@ -10,4 +10,13 @@ describe("reactive", () => {
     expect(isReactive(instance_reactive)).toBe(true);
     expect(isReactive(origin)).toBe(false);
   });
+
+  it("nested reactive", () => {
+    const origin = { foo: { age: 1 }, baz: [{ age: 2 }] };
+    const instance_reactive = reactive(origin);
+    expect(isReactive(instance_reactive)).toBe(true);
+    expect(isReactive(instance_reactive.foo)).toBe(true);
+    expect(isReactive(instance_reactive.baz)).toBe(true);
+    expect(isReactive(instance_reactive.baz[0])).toBe(true);
+  });
 });
