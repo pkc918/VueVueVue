@@ -50,3 +50,7 @@ export function isRef(ref) {
   // 为基础类型时候，undefined转换为 false
   return !!ref.__v_isRef;
 }
+
+export function unRef(ref) {
+  return isRef(ref) ? ref.value : ref;
+}
