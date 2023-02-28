@@ -8,7 +8,7 @@ let shouldTrack;
 const targetMap = new Map();
 
 // 用来包装依赖函数的类
-class ReactiveEffect {
+export class ReactiveEffect {
   private _fn;
   public scheduler: Function | undefined;
   deps = [];
