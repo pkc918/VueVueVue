@@ -7,6 +7,8 @@ class RefImpl {
   public dep;
   // 存储未被处理过的 value 值，应为需要对比，如果多层对象，修改的时候，是一个对象和Proxy对象比较，所以有问题
   private _rawValue: any;
+  // ref 数据标识
+  public __v_isRef = true;
   constructor(value) {
     this._rawValue = value;
     this._value = covert(value);
@@ -42,4 +44,9 @@ function trackRefValue(ref) {
 
 export function ref(value) {
   return new RefImpl(value);
+}
+
+export function isRef(ref) {
+  // 为基础类型时候，undefined转换为 false
+  return !!ref.__v_isRef;
 }
