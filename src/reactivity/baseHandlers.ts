@@ -1,6 +1,6 @@
 import { track, trigger } from "./effect";
 import { reactive, ReactiveFlags, readonly } from "./reactive";
-import { extend, isObject } from "./shared";
+import { extend, isObject } from "../shared";
 // 只在初始化的时候创建一次
 const get = createGetter();
 const set = createSetter();
