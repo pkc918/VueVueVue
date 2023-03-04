@@ -1,3 +1,5 @@
+import { h } from "../../lib/guide-vue_vue_vue.esm";
+
 export const App = {
   render() {
     // ui

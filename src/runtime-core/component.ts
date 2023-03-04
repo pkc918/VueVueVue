@@ -39,8 +39,7 @@ function handleSetupResult(instance, setupResult: any) {
 
 function finishComponentSetup(instance: any) {
   const Component = instance.type;
-  // 判断Component上有没有render,有 render，就把render 给实例对象
-  // 组件内部自定义了render函数
+  // 判断用户是否提供了render函数
   if (Component.render) {
     instance.render = Component.render;
   }
