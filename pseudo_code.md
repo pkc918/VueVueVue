@@ -285,3 +285,13 @@ function patchChildren(n1, n2, container, anchor, parentComponent) {
   }
 
 ```
+
+### runtime 中初始化 component 主流程
+
+1. render 开始，render 渲染组件到页面上，render 内部调用 patch
+2. patch 判断是什么类型（组件，元素，文本）需要处理，这里只说 component
+3. processComponent 做组件处理，里面使用 mountComponent 挂载组件到组件实例上
+4. 内部创建一个组件实例，把一需属性存储在实例对象上（props，slots 等）
+5. 执行组件的 setup，拿到对应的 setupResult，这个返回值可能是 function or object
+6. 判断是否为 object，如果是，那就把 setup 挂载到实例上
+7. 最后调用 finishComponentSetup，目的为了提供 render 函数，是组件内部自定义的或者是提供的
