@@ -295,3 +295,12 @@ function patchChildren(n1, n2, container, anchor, parentComponent) {
 5. 执行组件的 setup，拿到对应的 setupResult，这个返回值可能是 function or object
 6. 判断是否为 object，如果是，那就把 setup 挂载到实例上
 7. 最后调用 finishComponentSetup，目的为了提供 render 函数，是组件内部自定义的或者是提供的
+
+### 组件代理对象 this.$el
+
+1. this 是一个 Proxy 代理对象，挂载在组件实例上，最后通过把这个代理对象绑定到 render 函数的 this，所以在 render 函数里面的 this.x 就是通过这个代理对象取值
+2. 判断当前取值的 key，是否是 setupResult 里的属性，如果是，从里面取值，如果不是，继续判断是不是提供的像 $el $data 等这些属性，如果是，取对应值
+3. 当挂载元素的时候，有一个创建根节点的逻辑，在这里将创建的 DOM 元素存储在虚拟节点上（Vnode）
+4. 当挂载的是组件的时候，它会先转化为 subTree，在 subTree 里走过挂载元素的逻辑，所以在 subTree 中会有 el 属性，然后再将 subTree.el 赋值给 虚拟节点 Vnode.el
+
+这一部分使用代理，只是为了取不同的值，不存在依赖函数
