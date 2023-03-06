@@ -26,7 +26,8 @@ function processElement(vnode, container) {
 
 function mountElement(vnode: any, container: any) {
   const { type, props, children } = vnode;
-  const el = document.createElement(type);
+  // 相当于是把 el 挂载到 subTree 上
+  const el = (vnode.el = document.createElement(type)); // 元素时，存储根节点
   // children -> string or array
   if (typeof children === "string") {
     el.textContent = children;
@@ -56,16 +57,28 @@ function processComponent(vnode: any, container: any) {
   mountComponent(vnode, container);
 }
 
-function mountComponent(vnode: any, container) {
+function mountComponent(initialVNode: any, container) {
   // 创建组件实例，这个实例对象会存储一些组件上的属性 如：props，slots
-  const instance = createComponentInstance(vnode);
+  const instance = createComponentInstance(initialVNode);
   // 处理组件
   setupComponent(instance);
-  setupRenderEffect(instance, container);
+  setupRenderEffect(instance, initialVNode, container);
 }
 
-function setupRenderEffect(instance: any, container) {
-  // 虚拟节点树
-  const subTree = instance.render();
-  patch(subTree, container);
+function setupRenderEffect(instance: any, initialVNode, container) {
+  const { proxy } = instance;
+  // 虚拟节点树，把当前代理对象绑定为this，这里就是在页面中使用 this.data，这个代理对象将一些对应的属性绑定在内部
+  const subTree = instance.render.call(proxy);
+  /* 
+    const subTree = {
+      type,
+      props,
+      children,
+      el: null
+    };
+  */
+  // 组件最开始是vnode变量传入，然后变成subTree变量传入
+  patch(subTree, container); // 组件全部转化为 subTree 结构的时候
+  // 存储组件上的根节点
+  initialVNode.el = subTree.el;
 }

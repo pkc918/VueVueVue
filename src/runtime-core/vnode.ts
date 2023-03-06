@@ -3,6 +3,7 @@ export function createVNode(type, props?, children?) {
     type,
     props,
     children,
+    el: null, // this.$el 的取值
   };
   return vnode;
 }
