@@ -7,6 +7,7 @@
 # production
 /build
 /lib
+/example/helloworld/guide-vue_vue_vue.esm.js
 
 # misc
 .DS_Store
