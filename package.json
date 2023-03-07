@@ -6,10 +6,9 @@
   "repository": "git@github.com:pkc918/VueVueVue.git",
   "author": "XiaoPan <2489964425@qq.com>",
   "license": "MIT",
-  "type": "module",
   "scripts": {
     "test": "jest",
-    "build": "rollup -c rollup.config.js"
+    "build": "rollup -c rollup.config.js --bundleConfigAsCjs"
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",
