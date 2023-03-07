@@ -1,3 +1,4 @@
+import { isOnEventName } from "../shared/index";
 import { ShapeFlags } from "../shared/ShapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
 
@@ -42,8 +43,11 @@ function mountElement(vnode: any, container: any) {
   }
   // props -> object
   for (const key in props) {
-    if (Object.prototype.hasOwnProperty.call(props, key)) {
-      const val = props[key];
+    const val = props[key];
+    if (isOnEventName(key)) {
+      const eventName = key.slice(2).toLowerCase();
+      el.addEventListener(eventName, val);
+    } else {
       el.setAttribute(key, val);
     }
   }

@@ -9,3 +9,8 @@ export function isObject(value) {
 export function hasChanged(newValue, oldValue) {
   return !Object.is(newValue, oldValue);
 }
+
+// 判断是否是 onClick 这样的事件
+export function isOnEventName(key: string) {
+  return /^on[A-Z]/.test(key);
+}
