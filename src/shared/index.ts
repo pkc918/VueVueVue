@@ -14,3 +14,9 @@ export function hasChanged(newValue, oldValue) {
 export function isOnEventName(key: string) {
   return /^on[A-Z]/.test(key);
 }
+
+// 判断属性是否属于该对象
+export function hasOwn(val, key) {
+  // key 是否在 val 的原型上
+  return Object.prototype.hasOwnProperty.call(val, key);
+}

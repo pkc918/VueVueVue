@@ -328,3 +328,18 @@ export const enum ShapeFlags {
 (STATEFUL_COMPONENT | ARRAY_CHILDREN) & TEXT_CHILDREN === 0
 
 ```
+
+### props 功能
+
+- props 是 setup 函数的参数
+- props 有三个功能点：
+
+  1. 在 setup 函数里能拿到 props
+  2. 在 this 中能取到 props 的值
+  3. props 第一层数据是只读的，不能修改
+
+- 解决:
+
+1. 在初始化组件中`setupComponent`中会初始化组件的 props，将 props 挂载到组件的实例上（在`setupComponent`里实现）
+2. 在 this 这个代理对象中加入逻辑判断，与之前一样，判断当前 this 取的属性是否是 props 内的属性，然后返回它（在`PublicInstanceProxyHandlers`里实现）
+3. 在之前封装过一个 `shallowReadonly` 函数，能满足需求，将第一层变为只读，生层次不管，所以在第一个解决那传入的 props 变为传入 shallowReadonly 处理后的 props
