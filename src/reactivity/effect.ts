@@ -1,4 +1,4 @@
-import { extend } from "../shared";
+import { extend } from "../shared/index";
 
 // 存出 effect 实例
 let activeEffect;
