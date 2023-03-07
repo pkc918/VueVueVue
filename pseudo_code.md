@@ -304,3 +304,27 @@ function patchChildren(n1, n2, container, anchor, parentComponent) {
 4. 当挂载的是组件的时候，它会先转化为 subTree，在 subTree 里走过挂载元素的逻辑，所以在 subTree 中会有 el 属性，然后再将 subTree.el 赋值给 虚拟节点 Vnode.el
 
 这一部分使用代理，只是为了取不同的值，不存在依赖函数
+
+### ShapeFlags 用来判断节点类型的
+
+```TypeScript
+export const enum ShapeFlags {
+  ELEMENT = 1 << 0, // 0001 元素
+  STATEFUL_COMPONENT = 1 << 1, // 0010 组件
+  TEXT_CHILDREN = 1 << 2, // 0100 children属性是string类型
+  ARRAY_CHILDREN = 1 << 3, // 1000 children属性是数组类型
+}
+
+(ELEMENT | TEXT_CHILDREN) & TEXT_CHILDREN != 0
+(ELEMENT | TEXT_CHILDREN) & ARRAY_CHILDREN === 0
+
+(ELEMENT | ARRAY_CHILDREN) & ARRAY_CHILDREN != 0
+(ELEMENT | ARRAY_CHILDREN) & TEXT_CHILDREN === 0
+
+(STATEFUL_COMPONENT | TEXT_CHILDREN) & TEXT_CHILDREN != 0
+(STATEFUL_COMPONENT | TEXT_CHILDREN) & ARRAY_CHILDREN === 0
+
+(STATEFUL_COMPONENT | ARRAY_CHILDREN) & ARRAY_CHILDREN != 0
+(STATEFUL_COMPONENT | ARRAY_CHILDREN) & TEXT_CHILDREN === 0
+
+```

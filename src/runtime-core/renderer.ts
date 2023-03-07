@@ -1,4 +1,4 @@
-import { isObject } from "../shared/index";
+import { ShapeFlags } from "../shared/ShapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
 
 export function render(vnode, container) {
@@ -7,13 +7,18 @@ export function render(vnode, container) {
 }
 
 function patch(vnode, container) {
-  // 判断是什么类型更新
+  /* 
+      判断是什么类型更新 
+      ShapeFlags: element or component or text_children or array_children 
+  */
 
   // 处理element processElement
   // console.log(vnode.type);
-  if (typeof vnode.type === "string") {
+  const { shapeFlag } = vnode;
+  // 这里就是判断是否为 0，位运算: | 有1就1，& 有0就0
+  if (shapeFlag & ShapeFlags.ELEMENT) {
     processElement(vnode, container);
-  } else if (isObject(vnode.type)) {
+  } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
     // 处理组件 processComponent
     processComponent(vnode, container);
   }
@@ -25,13 +30,13 @@ function processElement(vnode, container) {
 }
 
 function mountElement(vnode: any, container: any) {
-  const { type, props, children } = vnode;
+  const { type, props, children, shapeFlag } = vnode;
   // 相当于是把 el 挂载到 subTree 上
   const el = (vnode.el = document.createElement(type)); // 元素时，存储根节点
-  // children -> string or array
-  if (typeof children === "string") {
+  // children -> string or array，这里只要不是对应的值，位运算后会变成0
+  if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
     el.textContent = children;
-  } else if (Array.isArray(children)) {
+  } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
     // vnode，挂载children在父元素上
     mountChildren(vnode, el);
   }
