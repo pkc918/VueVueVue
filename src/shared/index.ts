@@ -20,3 +20,20 @@ export function hasOwn(val, key) {
   // key 是否在 val 的原型上
   return Object.prototype.hasOwnProperty.call(val, key);
 }
+
+// 转驼峰 onAdd-foo
+export const camelize = (str: string) => {
+  return str.replace(/-(\w)/g, (_, c: string) => {
+    return c ? c.toUpperCase() : "";
+  });
+};
+
+// 首字母大写
+const capitalize = (str: string): string => {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
+// 转换事件
+export const toHandlerKey = (str: string) => {
+  return str ? `on${capitalize(str)}` : "";
+};
