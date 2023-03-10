@@ -20,7 +20,18 @@ export const App = {
           console.log("mousedown");
         },
       },
-      [h("div", {}, "hi, " + this.msg), h(Foo, { count: { value: 1 } })]
+      [
+        h("div", {}, "hi, " + this.msg),
+        h(Foo, {
+          count: { value: 1 },
+          onAdd() {
+            console.log("App.js：@Add");
+          },
+          onAddFoo() {
+            console.log("App.js: @Add-Foo");
+          },
+        }),
+      ]
     );
   },
 
