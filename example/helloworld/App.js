@@ -46,8 +46,8 @@ export const App = {
             </template>
           */
           {
-            header: h("p", {}, "slots: header"),
-            footer: h("p", {}, "slots: footer"),
+            header: ({ random }) => h("p", {}, "slots: header " + random),
+            footer: () => h("p", {}, "slots: footer"),
           }
         ),
       ]
