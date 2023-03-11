@@ -343,3 +343,61 @@ export const enum ShapeFlags {
 1. 在初始化组件中`setupComponent`中会初始化组件的 props，将 props 挂载到组件的实例上（在`setupComponent`里实现）
 2. 在 this 这个代理对象中加入逻辑判断，与之前一样，判断当前 this 取的属性是否是 props 内的属性，然后返回它（在`PublicInstanceProxyHandlers`里实现）
 3. 在之前封装过一个 `shallowReadonly` 函数，能满足需求，将第一层变为只读，生层次不管，所以在第一个解决那传入的 props 变为传入 shallowReadonly 处理后的 props
+
+### slot 实现
+
+- slot 本质就是组件的 children
+- 因为有具名插槽，所以它不是数组，而是对象类型，{name: slot}
+- 因为插槽有作用域插槽，所以 slot 是函数，传出来的参数相当于组件 props 类似，所以用了函数来传递 {name: (props) => slot}
+
+当组件内传递 slot 时，组件的 children 就是 slot，所以需要把每个 children 挂载到组件实例上
+
+```TypeScript
+function normalizeObjectSlots(children: any, slots: any) {
+  // 这个 slots 就是 instance 上的属性
+  for (const key in children) {
+    const value = children[key];
+    slots[key] = (props) => normalizeSlotValue(value(props));
+  }
+}
+```
+
+透过现象看本质：
+
+```TypeScript
+<slot></slot>  对应  _renderSlot(_ctx.$slots, "default"),
+
+<Foo>
+  <p>123</p>
+  <p>345</p>
+  <template v-slot:header></template>
+</Foo>
+上面这 Foo 对应：
+_createVNode(_component_Foo, null, {
+  header: _withCtx(() => []),
+  default: _withCtx(() => [
+    _createElementVNode("p", null, "123"),
+    _createElementVNode("p", null, "345")
+  ], undefined, true),
+  _: 1 /* STABLE */
+})
+```
+
+在 Vue3 中使用形式：
+
+```vue
+// MySlots.vue
+<script>
+const mySlots = ref < string > "试试 作用域slot demo";
+</script>
+<template>
+  <div>
+    <slot :text="mySlots"></slot>
+  </div>
+</template>
+
+// app.vue
+<MySlots v-slot="slotProps">
+  {{ slotProps.text }}
+</MySlots>
+```

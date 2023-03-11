@@ -1,6 +1,7 @@
 import { isOnEventName } from "../shared/index";
 import { ShapeFlags } from "../shared/ShapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
+import { Fragment, Text } from "./vnode";
 
 export function render(vnode, container) {
   // patch
@@ -15,14 +16,35 @@ function patch(vnode, container) {
 
   // 处理element processElement
   // console.log(vnode.type);
-  const { shapeFlag } = vnode;
-  // 这里就是判断是否为 0，位运算: | 有1就1，& 有0就0
-  if (shapeFlag & ShapeFlags.ELEMENT) {
-    processElement(vnode, container);
-  } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
-    // 处理组件 processComponent
-    processComponent(vnode, container);
+  const { shapeFlag, type } = vnode;
+  // Fragment -> 只渲染 children 给slot用的，children:[Foo, Bar, [vnode, vnode]]
+  switch (type) {
+    case Fragment:
+      processFragment(vnode, container);
+      break;
+    case Text:
+      processText(vnode, container);
+      break;
+    default:
+      // 这里就是判断是否为 0，位运算: | 有1就1，& 有0就0
+      if (shapeFlag & ShapeFlags.ELEMENT) {
+        processElement(vnode, container);
+      } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+        // 处理组件 processComponent
+        processComponent(vnode, container);
+      }
+      break;
   }
+}
+
+function processText(vnode: any, container: any) {
+  const { children } = vnode;
+  const textNode = (vnode.el = document.createTextNode(children));
+  container.append(textNode);
+}
+
+function processFragment(vnode: any, container: any) {
+  mountChildren(vnode, container);
 }
 
 function processElement(vnode, container) {
@@ -76,6 +98,8 @@ function mountComponent(initialVNode: any, container) {
 
 function setupRenderEffect(instance: any, initialVNode, container) {
   const { proxy } = instance;
+  console.log(instance);
+
   // 虚拟节点树，把当前代理对象绑定为this，这里就是在页面中使用 this.data，这个代理对象将一些对应的属性绑定在内部
   const subTree = instance.render.call(proxy);
   /* 
