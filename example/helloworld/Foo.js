@@ -1,6 +1,13 @@
-import { h, renderSlots } from "../../lib/guide-vue_vue_vue.esm.js";
+import {
+  getCurrentInstance,
+  h,
+  renderSlots,
+} from "../../lib/guide-vue_vue_vue.esm.js";
 export const Foo = {
+  name: "Foo",
   setup(props, { emit }) {
+    const instance = getCurrentInstance();
+    console.log("Foo.js: ", instance);
     props.count.value++;
     console.log(props, "props");
 

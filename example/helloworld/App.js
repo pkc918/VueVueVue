@@ -1,5 +1,9 @@
 import { Foo } from "./Foo.js";
-import { h, createTextVNode } from "../../lib/guide-vue_vue_vue.esm.js";
+import {
+  h,
+  createTextVNode,
+  getCurrentInstance,
+} from "../../lib/guide-vue_vue_vue.esm.js";
 
 window.self = null;
 export const App = {
@@ -7,6 +11,7 @@ export const App = {
   render() {
     window.self = this;
     console.log(this.msg, "this");
+
     // ui
     return h(
       "div",
@@ -60,6 +65,8 @@ export const App = {
 
   setup() {
     // composition API
+    const instance = getCurrentInstance();
+    console.log("App.js: ", instance);
 
     return {
       msg: "VueVueVue",
