@@ -3,6 +3,7 @@ import { hasOwn } from "../shared/index";
 // this.x 快捷操作
 const publicPropertiesMap = {
   $el: (i) => i.vnode.el,
+  $slots: (i) => i.slots,
 };
 
 export const PublicInstanceProxyHandlers = {
