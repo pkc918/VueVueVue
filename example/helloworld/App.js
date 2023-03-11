@@ -1,5 +1,5 @@
 import { Foo } from "./Foo.js";
-import { h } from "../../lib/guide-vue_vue_vue.esm.js";
+import { h, createTextVNode } from "../../lib/guide-vue_vue_vue.esm.js";
 
 window.self = null;
 export const App = {
@@ -46,7 +46,11 @@ export const App = {
             </template>
           */
           {
-            header: ({ random }) => h("p", {}, "slots: header " + random),
+            header: ({ random }) => [
+              h("p", {}, "slots: header " + random),
+              createTextVNode("你好"),
+            ],
+
             footer: () => h("p", {}, "slots: footer"),
           }
         ),
