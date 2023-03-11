@@ -22,15 +22,34 @@ export const App = {
       },
       [
         h("div", {}, "hi, " + this.msg),
-        h(Foo, {
-          count: { value: 1 },
-          onAdd() {
-            console.log("App.js：@Add");
+        // 组件下的 children 就是 slots
+        h(
+          Foo,
+          {
+            count: { value: 1 },
+            onAdd() {
+              console.log("App.js：@Add");
+            },
+            onAddFoo() {
+              console.log("App.js: @Add-Foo");
+            },
           },
-          onAddFoo() {
-            console.log("App.js: @Add-Foo");
-          },
-        }),
+          // 数组 or vnode
+          // h("p", {}, "slots: foo789")
+          // 剧名插槽
+          /* 
+            <template #header>
+              <p>slots: header</p>
+            </template>
+            <template #footer>
+              <p>slots: footer</p>
+            </template>
+          */
+          {
+            header: h("p", {}, "slots: header"),
+            footer: h("p", {}, "slots: footer"),
+          }
+        ),
       ]
     );
   },

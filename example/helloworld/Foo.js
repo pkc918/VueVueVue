@@ -1,4 +1,4 @@
-import { h } from "../../lib/guide-vue_vue_vue.esm.js";
+import { h, renderSlots } from "../../lib/guide-vue_vue_vue.esm.js";
 export const Foo = {
   setup(props, { emit }) {
     props.count.value++;
@@ -23,6 +23,15 @@ export const Foo = {
       "emitAdd"
     );
     const foo = h("p", {}, "foo");
-    return h("div", {}, [foo, btn]);
+    console.log(this.$slots, "slots");
+    // $slots 就是拿 children，渲染一个节点的时候，children 里面必须是一个虚拟节点，不可以是 数组，所以没有显示
+    // return h("div", {}, [foo, btn, this.$slots]); // children: [foo, btn, [vnode, vnode]]
+    // return h("div", {}, [foo, btn, renderSlots(this.$slots)]); // children: [foo, btn, div{ children: [vnode, vnode]}]
+    return h("div", {}, [
+      renderSlots(this.$slots, "header"), // <slot name="header"></slot>
+      foo,
+      btn,
+      renderSlots(this.$slots, "footer"), // <slot name="footer"></slot>
+    ]);
   },
 };
