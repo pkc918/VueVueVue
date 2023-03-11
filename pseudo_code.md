@@ -401,3 +401,36 @@ const mySlots = ref < string > "试试 作用域slot demo";
   {{ slotProps.text }}
 </MySlots>
 ```
+
+### getCurrentInstance API
+
+作用：用来获取当前组件的 instance，这个 API 必须要在 setup 中使用
+
+```TypeScript
+let currentInstance = null;
+
+export function getCurrentInstance(instance) {
+  return currentInstance;
+}
+
+function setCurrentInstance(instance) {
+  currentInstance = instance;
+}
+
+function setupStatefulComponent(instance: any) {
+  const { setup } = Component;
+  if (setup) {
+    setCurrentInstance(instance);
+    // function(render) or object(data)
+    // setup(props)  setup(props, { emit })
+    const setupResult = setup(shallowReadonly(instance.props), {
+      emit: instance.emit,
+    });
+    // 清空，不然子组件里也是同样的了
+    setCurrentInstance(null);
+  }
+}
+
+```
+
+当组件初始化执行 setup 的时候，将 instance 值记录，因为在父组件 setup 后，子组件也有 setup 的过程，所以需要清空
