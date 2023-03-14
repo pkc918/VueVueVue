@@ -4,12 +4,16 @@ import { initProps } from "./componentProps";
 import { PublicInstanceProxyHandlers } from "./componentPublicInstance";
 import { initSlots } from "./componentSlots";
 
-export function createComponentInstance(vnode) {
+export function createComponentInstance(vnode, parent) {
+  console.log("createComponent: ", parent);
+
   const component = {
     vnode,
     type: vnode.type,
     setupState: {}, // 初始化组件的时候，把setup的return值绑定到代理对象上
     slots: {},
+    provides: parent ? parent.provides : {},
+    parent,
     emit: () => {},
   };
   component.emit = emit.bind(null, component) as any;
@@ -66,7 +70,7 @@ function finishComponentSetup(instance: any) {
 
 let currentInstance = null;
 
-export function getCurrentInstance(instance) {
+export function getCurrentInstance() {
   return currentInstance;
 }
 
