@@ -434,3 +434,30 @@ function setupStatefulComponent(instance: any) {
 ```
 
 当组件初始化执行 setup 的时候，将 instance 值记录，因为在父组件 setup 后，子组件也有 setup 的过程，所以需要清空
+
+### provide & inject
+
+provide 和 inject 用法
+
+```TypeScript
+// provide
+provide("foo", "fooVal");
+provide("bar", "barVal");
+// inject
+const bar = inject("bar");
+const baz = inject("baz", "bazDefault");
+const baz1 = inject("baz1", () => "baz11111");
+```
+
+provide(key, value)
+
+inject(key, defaultValue?)
+
+provide 与 inject 核心就是一个存取，所以如何存，如何取就是我们关心的，provide 提供了 key 和 value，我们需要存储对应关系，所以在每个组件实例上都提供了一个 provides 的属性用来存
+自己组件中 provide 提供的数据，在函数内获取当前组件实例，然后将用户 provide 传过来的对应关系存在 provides 属性上
+又因为依赖注入是跨层级的，所以提供 provides 对象的时候，需要把当前的 provides 与父组件的 provides 产生对应关系，也就是进行原型连接
+这样当取值的时候，最近一级 provides 没有取到值得时候，会顺着原型链查找，直到找到。
+
+inject 核心就是取值，默认取值方法很简单，就是从当前组件的父组件上的 provides 开始取值，进行 key 的匹配，如果匹配到直接返回，如果没有提供对应 key，那么就返回 undefined
+inject 第二种用法就是可以自己提供默认值，当祖先组件没有提供对应 provides 的数据时，有个默认值，也就是判断 key 是否在父组件的 provides 的原型上，如果不在，那就说明没有提供 provides，然后继而判断 defaultValue 是否有值，有就返回
+inject 第三种就是第二种的升华，也就是在 defaultValue 有值的时候，进行类型判断，如果是函数，那就执行该函数，return 该函数执行的返回值
