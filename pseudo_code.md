@@ -461,3 +461,16 @@ provide 与 inject 核心就是一个存取，所以如何存，如何取就是�
 inject 核心就是取值，默认取值方法很简单，就是从当前组件的父组件上的 provides 开始取值，进行 key 的匹配，如果匹配到直接返回，如果没有提供对应 key，那么就返回 undefined
 inject 第二种用法就是可以自己提供默认值，当祖先组件没有提供对应 provides 的数据时，有个默认值，也就是判断 key 是否在父组件的 provides 的原型上，如果不在，那就说明没有提供 provides，然后继而判断 defaultValue 是否有值，有就返回
 inject 第三种就是第二种的升华，也就是在 defaultValue 有值的时候，进行类型判断，如果是函数，那就执行该函数，return 该函数执行的返回值
+
+### 更新 props 规则
+
+新旧 props 对比：
+
+1. 当旧 props 有 a 属性，新 props 没有时，执行删除 a 功能
+2. 当旧 props 没有 a 属性，新 props 有时，执行添加 a 功能
+
+只要两者的某个属性不相等时，一律按照新 props 来
+
+循环新 props，对比新旧 props 下的每个属性，不同，就按照新 props 赋值
+
+循环旧 props，当旧 props 中某个属性不在新 props 上，那就删除
