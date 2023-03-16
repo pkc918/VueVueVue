@@ -1,4 +1,5 @@
 export const extend = Object.assign;
+export const EMPTY_OBJ = {};
 
 // 是对象就 return true
 export function isObject(value) {

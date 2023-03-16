@@ -1,4 +1,5 @@
 import { effect } from "../reactivity/effect";
+import { EMPTY_OBJ } from "../shared";
 import { ShapeFlags } from "../shared/ShapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
 import { createAppAPI } from "./createApp";
@@ -69,6 +70,33 @@ export function createRenderer(options) {
   function patchElement(n1, n2, container) {
     console.log("patchElement");
     // 对比 props，children
+    const oldProps = n1.props || EMPTY_OBJ;
+    const newProps = n2.props || EMPTY_OBJ;
+    // 新的vnode里没有el，这两是同一个元素不同时期的东西（同层级）
+    const el = (n2.el = n1.el);
+    patchProps(el, oldProps, newProps);
+  }
+
+  // hostPatchProp: 变化当前key下的值
+  function patchProps(el, oldProps, newProps) {
+    if (oldProps !== newProps) {
+      // 新旧props里都有属性，只是属性值有所改变
+      for (const key in newProps) {
+        const prevProp = oldProps[key];
+        const nextProp = newProps[key];
+        if (prevProp !== nextProp) {
+          hostPatchProp(el, key, prevProp, nextProp);
+        }
+      }
+      if (oldProps !== EMPTY_OBJ) {
+        // 旧props里有a属性，新props里没有a属性
+        for (const key in oldProps) {
+          if (!(key in newProps)) {
+            hostPatchProp(el, key, oldProps[key], null);
+          }
+        }
+      }
+    }
   }
 
   function mountElement(vnode: any, container: any, parentComponent) {
@@ -85,13 +113,7 @@ export function createRenderer(options) {
     // props -> object
     for (const key in props) {
       const val = props[key];
-      // if (isOnEventName(key)) {
-      //   const eventName = key.slice(2).toLowerCase();
-      //   el.addEventListener(eventName, val);
-      // } else {
-      //   el.setAttribute(key, val);
-      // }
-      hostPatchProp(el, key, val);
+      hostPatchProp(el, key, null, val);
     }
     // el.setAttribute("id", "root");
     // container.append(el);

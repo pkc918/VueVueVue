@@ -4,12 +4,17 @@ import { isOnEventName } from "../shared";
 function createElement(type) {
   return document.createElement(type);
 }
-function patchProp(el, key, val) {
+function patchProp(el, key, preVal, nextVal) {
   if (isOnEventName(key)) {
     const eventName = key.slice(2).toLowerCase();
-    el.addEventListener(eventName, val);
+    el.addEventListener(eventName, nextVal);
   } else {
-    el.setAttribute(key, val);
+    // 当属性值变为 undefined 和 null 后，被清除
+    if (nextVal === undefined || nextVal === null) {
+      el.removeAttribute(key);
+    } else {
+      el.setAttribute(key, nextVal);
+    }
   }
 }
 function insert(el, parent) {
