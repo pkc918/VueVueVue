@@ -474,3 +474,70 @@ inject 第三种就是第二种的升华，也就是在 defaultValue 有值的�
 循环新 props，对比新旧 props 下的每个属性，不同，就按照新 props 赋值
 
 循环旧 props，当旧 props 中某个属性不在新 props 上，那就删除
+
+### 双端 diff
+
+```TypeScript
+  let i = 0;
+  let e1 = c1.length - 1; // 旧节点右指针
+  let e2 = l2 - 1; // 新节点右指针
+
+/* 固定i的位置，也就是从左往右，遇到第一个不同就停止i的变化 */
+  // 左侧
+  while (i <= e1 && i <= e2) {
+    const n1 = c1[i];
+    const n2 = c2[i];
+    // 判断对应位置的节点是否相同
+    if (isSomeVNodeType(n1, n2)) {
+      // 判断同位置相同节点类型下的属性是否变化
+      patch(n1, n2, container, parentComponent, parentAnchor);
+    } else {
+      break;
+    }
+    i++;
+  }
+
+/* 固定e1和e2的值，从右往左，直到第一个新旧vnode不同 */
+  // 右侧
+  while (i <= e1 && i <= e2) {
+    const n1 = c1[e1];
+    const n2 = c2[e2];
+
+    if (isSomeVNodeType(n1, n2)) {
+      patch(n1, n2, container, parentComponent, parentAnchor);
+    } else {
+      break;
+    }
+    e1--;
+    e2--;
+  }
+/* 新的比老的多的时候，i > e1 的，老的比新的多的时候，i <= e1,最小值就是e1 */
+  // 新的比老的多
+  if (i > e1) {
+    /* i 到 e2 就是新vnode的有变化区域 */
+    if (i <= e2) {
+      const nextPos = e2 + 1;
+      const anchor = nextPos < l2 ? c2[nextPos].el : null;
+      while (i <= e2) {
+        patch(null, c2[i], container, parentComponent, anchor);
+        i++;
+      }
+    }
+  }
+/* 旧的比新的多，中间需要删除的部分 i 到 e1 */
+  else if (i > e2) {
+      while (i <= e1) {
+        hostRemove(c1[i].el);
+        i++;
+      }
+  }
+/* 中间有变化区域的对比 */
+  else{
+    // 涉及 新增，删除，移动
+    /*
+    1. 遍历老节点生成对应的映射表，方便取值
+    2. 遍历中间区域的新元素部分，判断旧节点是否存有该元素，如果有存在旧只需要移动即可，不存在就是创建
+    3. 使用最长递增子序列留存元素的抽象位置关系
+    */
+  }
+```
