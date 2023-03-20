@@ -1,8 +1,8 @@
 import { h } from "../../lib/guide-vue_vue_vue.esm.js";
 // import ArrayToText from "./ArrayToText.js";
 // import TextToText from "./TextToText.js";
-import TextToArray from "./TextToArray.js";
-// import ArrayToArray from "./ArrayToArray.js";
+// import TextToArray from "./TextToArray.js";
+import ArrayToArray from "./ArrayToArray.js";
 export default {
   name: "App",
   setup() {},
@@ -14,7 +14,9 @@ export default {
       // old: text, new: text
       // h(TextToText),
       // old: text, new: array
-      h(TextToArray),
+      // h(TextToArray),
+      // old: array, new: array
+      h(ArrayToArray),
     ]);
   },
 };
