@@ -8,6 +8,7 @@ export function createVNode(type, props?, children?) {
     type,
     props,
     children,
+    comopnent: null,
     key: props?.key,
     shapeFlag: getShapeFlag(type),
     el: null, // this.$el 的取值

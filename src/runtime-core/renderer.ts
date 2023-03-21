@@ -2,6 +2,7 @@ import { effect } from "../reactivity/effect";
 import { EMPTY_OBJ } from "../shared";
 import { ShapeFlags } from "../shared/ShapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
+import { shouldUpdateComponent } from "./componentUpdateUtils";
 import { createAppAPI } from "./createApp";
 import { Fragment, Text } from "./vnode";
 
@@ -320,8 +321,23 @@ export function createRenderer(options) {
     parentComponent,
     anchor
   ) {
-    // 挂载component
-    mountComponent(n2, container, parentComponent, anchor);
+    if (!n1) {
+      // 挂载component,n1不存在的时候就是初始化
+      mountComponent(n2, container, parentComponent, anchor);
+    } else {
+      updateComponent(n1, n2);
+    }
+  }
+
+  function updateComponent(n1, n2) {
+    const instance = (n2.component = n1.component);
+    if (shouldUpdateComponent(n1, n2)) {
+      instance.next = n2;
+      instance.update();
+    } else {
+      n2.el = n1.el;
+      instance.vnode = n2;
+    }
   }
 
   function mountComponent(
@@ -331,14 +347,18 @@ export function createRenderer(options) {
     anchor
   ) {
     // 创建组件实例，这个实例对象会存储一些组件上的属性 如：props，slots
-    const instance = createComponentInstance(initialVNode, parentComponent);
+    const instance = (initialVNode.component = createComponentInstance(
+      initialVNode,
+      parentComponent
+    ));
     // 处理组件
     setupComponent(instance);
     setupRenderEffect(instance, initialVNode, container, anchor);
   }
 
   function setupRenderEffect(instance: any, initialVNode, container, anchor) {
-    effect(() => {
+    // 存储effect返回的render函数，供给组件更新的时候使用
+    instance.update = effect(() => {
       if (!instance.isMounted) {
         console.log("init");
         const { proxy } = instance;
@@ -359,6 +379,12 @@ export function createRenderer(options) {
         instance.isMounted = true;
       } else {
         console.log("update");
+        // next:下次要更新的节点, vnode:更新之前的节点
+        const { next, vnode } = instance;
+        if (next) {
+          next.el = vnode.el;
+          updateComponentPreRender(instance, next);
+        }
         const { proxy } = instance;
         // 新treeVnode
         const subTree = instance.render.call(proxy);
@@ -374,6 +400,12 @@ export function createRenderer(options) {
   return {
     createApp: createAppAPI(render),
   };
+}
+
+function updateComponentPreRender(instance, nextVNode) {
+  instance.vnode = nextVNode;
+  instance.next = null;
+  instance.props = nextVNode.props; // 跟新组件的props
 }
 
 function getSequence(arr: number[]): number[] {

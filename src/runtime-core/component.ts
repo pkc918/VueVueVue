@@ -11,6 +11,7 @@ export function createComponentInstance(vnode, parent) {
     type: vnode.type,
     setupState: {}, // 初始化组件的时候，把setup的return值绑定到代理对象上
     slots: {},
+    next: null,
     provides: parent ? parent.provides : {},
     parent,
     isMounted: false, // 是否是初始化
