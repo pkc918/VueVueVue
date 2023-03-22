@@ -541,3 +541,24 @@ inject 第三种就是第二种的升华，也就是在 defaultValue 有值的�
     */
   }
 ```
+
+### nextTick
+
+nextTick 用法：
+
+```TypeScript
+nextTick(() => {})
+await netxTick()
+```
+
+nextTick 真的没什么，就是把传入的回调函数，使用微任务的方式进行执行
+
+或者不传参的时候，执行一次微任务就行
+
+```TypeScript
+export function nextTick(fn) {
+  return fn ? p.then(fn) : p;
+}
+```
+
+但是要知道为什么要有 nextTick 呢，比如，有一个值循环连续更新 100 次，不可能每一次值更新就视图更新，这样对于性能的开销不友好，这里就使用到了 nextTick 延时更新最后一次就行
