@@ -1,11 +1,12 @@
-export const RegRulers = {
-  contentReg: /^{{\s*(\w+)\s*}}/,
-  tagReg: /^<\/?([a-z]*)>/i,
-  textReg: /^([\s\S]*)$/,
-};
+export const enum ElementTypes {
+  ELEMENT,
+}
+
 export const enum NodeTypes {
+  TEXT,
+  ROOT,
   INTERPOLATION,
   SIMPLE_EXPRESSION,
   ELEMENT,
-  TEXT,
+  COMPOUND_EXPRESSION,
 }
