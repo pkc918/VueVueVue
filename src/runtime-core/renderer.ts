@@ -4,6 +4,7 @@ import { ShapeFlags } from "../shared/ShapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
 import { shouldUpdateComponent } from "./componentUpdateUtils";
 import { createAppAPI } from "./createApp";
+import { queueMicrotasks } from "./scheduler";
 import { Fragment, Text } from "./vnode";
 
 export function createRenderer(options) {
@@ -358,13 +359,14 @@ export function createRenderer(options) {
 
   function setupRenderEffect(instance: any, initialVNode, container, anchor) {
     // 存储effect返回的render函数，供给组件更新的时候使用
-    instance.update = effect(() => {
-      if (!instance.isMounted) {
-        console.log("init");
-        const { proxy } = instance;
-        // 虚拟节点树，把当前代理对象绑定为this，这里就是在页面中使用 this.data，这个代理对象将一些对应的属性绑定在内部
-        const subTree = (instance.subTree = instance.render.call(proxy));
-        /* 
+    instance.update = effect(
+      () => {
+        if (!instance.isMounted) {
+          console.log("init");
+          const { proxy } = instance;
+          // 虚拟节点树，把当前代理对象绑定为this，这里就是在页面中使用 this.data，这个代理对象将一些对应的属性绑定在内部
+          const subTree = (instance.subTree = instance.render.call(proxy));
+          /* 
           const subTree = {
             type,
             props,
@@ -372,29 +374,36 @@ export function createRenderer(options) {
             el: null
           };
         */
-        // 组件最开始是vnode变量传入，然后变成subTree变量传入
-        patch(null, subTree, container, instance, anchor); // 组件全部转化为 subTree 结构的时候
-        // 存储组件上的根节点
-        initialVNode.el = subTree.el;
-        instance.isMounted = true;
-      } else {
-        console.log("update");
-        // next:下次要更新的节点, vnode:更新之前的节点
-        const { next, vnode } = instance;
-        if (next) {
-          next.el = vnode.el;
-          updateComponentPreRender(instance, next);
+          // 组件最开始是vnode变量传入，然后变成subTree变量传入
+          patch(null, subTree, container, instance, anchor); // 组件全部转化为 subTree 结构的时候
+          // 存储组件上的根节点
+          initialVNode.el = subTree.el;
+          instance.isMounted = true;
+        } else {
+          console.log("update");
+          // next:下次要更新的节点, vnode:更新之前的节点
+          const { next, vnode } = instance;
+          if (next) {
+            next.el = vnode.el;
+            updateComponentPreRender(instance, next);
+          }
+          const { proxy } = instance;
+          // 新treeVnode
+          const subTree = instance.render.call(proxy);
+          // 旧treeVnode
+          const prevSubTree = instance.subTree;
+          console.log("new subTree：", subTree);
+          console.log("olg subTree：", prevSubTree);
+          patch(prevSubTree, subTree, container, instance, anchor);
         }
-        const { proxy } = instance;
-        // 新treeVnode
-        const subTree = instance.render.call(proxy);
-        // 旧treeVnode
-        const prevSubTree = instance.subTree;
-        console.log("new subTree：", subTree);
-        console.log("olg subTree：", prevSubTree);
-        patch(prevSubTree, subTree, container, instance, anchor);
+      },
+      {
+        scheduler() {
+          console.log("update - scheduler");
+          queueMicrotasks(instance.update);
+        },
       }
-    });
+    );
   }
 
   return {
